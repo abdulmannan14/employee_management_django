@@ -1,0 +1,13 @@
+{% load static %}
+
+<header>
+    <div class="row">
+        <div class="col-1"></div>
+        <div class="col-4 font-weight-bolder" style="color: white">{{ full_name|upper }}</div>
+        <div class="col-5"><span class="align-content-center align-items-center"
+                                 style="font-weight: bolder;font-size: larger;color: white">EMPLOYEE MANAGEMENT DASHBOARD</span>
+        </div>
+        <div class="col-2"><a class="float-right mr-3" href="{% url 'logout' %}" style="color: white">Logout</a>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,217 @@
+{% load static %}
+{% load django_tables2 %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {#    ======================#}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Bootstrap JS -->
+    {#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>#}
+    {#    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>#}
+
+    {#    ======================#}
+    <style>
+        .float-right a {
+            display: inline-block; /* Make anchor tags behave like block elements */
+            padding: 10px 20px; /* Add padding */
+            background-color: #c4baba; /* Set background color */
+            color: #131313; /* Set font color */
+            text-decoration: none; /* Remove default underline */
+            border-radius: 5px; /* Add border radius for rounded corners */
+            transition: background-color 0.3s ease; /* Add transition for smooth color change */
+        }
+
+        .float-right a:hover {
+            background-color: #0056b3; /* Change background color on hover */
+            color: #ffffff; /* Change font color on hover */
+        }
+
+        .float-right button {
+            background-color: #007bff; /* Set background color */
+            color: #fff; /* Set font color */
+            border: none; /* Remove border */
+            border-radius: 5px; /* Add border radius for rounded corners */
+            padding: 10px 20px; /* Add padding */
+            margin-left: 10px; /* Add margin between buttons */
+            font-size: 16px; /* Set font size */
+            cursor: pointer; /* Add pointer cursor on hover */
+            transition: background-color 0.3s ease; /* Add transition for smooth color change */
+        }
+
+        .float-right button:hover {
+            background-color: #0056b3; /* Change background color on hover */
+        }
+
+        .form-control {
+            width: 100%; /* Set the width to 100% */
+            max-width: 300px; /* Optionally, set a maximum width */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .alert-container {
+            position: fixed;
+            top: 100px; /* Adjust as needed */
+            right: 20px; /* Adjust as needed */
+            z-index: 9999;
+        }
+
+        .alert {
+            width: 200px; /* Adjust as needed */
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+
+    </style>
+</head>
+<body>
+{% include "includes/admin/header.html" %}
+{% include "includes/admin/nav.html" %}
+<div class="sidebar">
+    {% include "includes/admin/sidebar.html" %}
+</div>
+<div class="container-fluid" style="height: 500px;width: 1200px;margin-left: 400px;margin-top: 70px">
+    <div class="row">
+        <div class="card" style="width: 1000px">
+            <div class="card-body">
+                <h2 class="card-title">{{ form_title }}</h2>
+                {% if form %}
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            {% for field in form %}
+                                <div class="col-3 form-group">
+                                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                                    <br>
+                                    {% render_field field class="form-control" %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-primary float-right">Submit</button>
+                    </form>
+                {% endif %}
+                {#            ===========TODO========================LEAVE REQUESTS=========================START=========#}
+                {% if leave_requests %}
+                    {% for request in leave_requests %}
+                        <div class="card" style="border-width: 6px;">
+                            <div class="card-header" style="background: #3F28E3;color: white ">
+                                <div class="row">
+                                    <div class="col-3">{{ request.userprofile.user.get_full_name }}</div>
+                                    <div class="col-7">{{ request.title }}</div>
+                                    <div class="col-2 font-weight-bold"
+                                         {% if request.approval_status == 'PENDING' %}style="color: #ffdd00";
+                                         {% else %}{% if request.approval_status == 'DENIED' %}style="color: red"
+                                         {% else %}style="color: #5bda5b"
+                                         {% endif %} {% endif %}
+                                         style="background: white">{{ request.approval_status|upper }}</div>
+
+                                </div>
+
+                            </div>
+                            <div class="card-body">
+                                <p>{{ request.description }}</p>
+                                <br>
+                                <p>Date: &nbsp;&nbsp;&nbsp;{{ request.created_at }}</p>
+                                <div class="float-right">
+                                    <a href="{% url 'manager-take-action-on-leave-requests' request.id %}?decision=1">Approve</a>
+                                    <a href="{% url 'manager-take-action-on-leave-requests' request.id %}?decision=0">Reject</a>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    {% endfor %}
+
+                {% endif %}
+                {#            ===========TODO========================LEAVE REQUESTS=========================END=========#}
+                {#            ===========TODO========================SALES ADVISORS=========================START=========#}
+                {% if advisors %}
+                    {% for advisor in advisors %}
+                        <div class="card" style="border-width: 6px;">
+                            <div class="card-header" style="background: #3F28E3;color: white ">
+                                <div class="row">
+                                    <div class="col-3">{{ advisor.user.get_full_name }}</div>
+
+                                </div>
+
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6"><p class="font-weight-bolder">Middle Name :
+                                        &nbsp;&nbsp;&nbsp;{{ advisor.middle_name }}</p>
+                                    </div>
+                                    <div class="col-6"><p class="font-weight-bolder">Employee Number :
+                                        &nbsp;&nbsp;&nbsp;{{ advisor.employee_number }}</p></div>
+                                    <div class="col-6"><p class="font-weight-bolder">Enmployee Department :
+                                        &nbsp;&nbsp;&nbsp;{{ advisor.department }}</p></div>
+                                    <div class="col-6"><p class="font-weight-bolder">Employee Phone
+                                        :&nbsp;&nbsp;&nbsp; {{ advisor.phone }}</p>
+                                    </div>
+                                    <div class="col-10"><p class="font-weight-bolder">Employee Address :
+                                        &nbsp;&nbsp;&nbsp;{{ advisor.address }}</p>
+                                    </div>
+                                </div>
+
+
+                                <br>
+                                <div class="float-right">
+                                    <a href="{% url 'manager-edit-advisor-department' advisor.id %}?decision=1"
+                                    >Edit Department</a>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <br>
+
+                    {% endfor %}
+
+                {% endif %}
+                {#            ===========TODO========================SALES ADVISORS=========================END=========#}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% if messages %}
+    <div id="alert-container" class="alert-container">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<script>
+    $(document).ready(function () {
+        $('.userTable').DataTable();
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.alert').delay(3000).fadeOut('slow', function () {
+            $(this).remove();
+        });
+    });
+</script>
+</body>
+</html>
