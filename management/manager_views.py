@@ -16,7 +16,7 @@ from django.db.models import Q
 from . import forms as management_forms, tables as management_tables
 from account import models as account_models
 from django.db.models import Q
-
+from employee_management import utils as em_utils_
 
 # Create your views here.
 
@@ -160,16 +160,22 @@ def manager_messages(request):
     all_receiver_groups = management_models.ReceiverGroup.objects.filter(users=request.user.userprofile, is_group=True)
     allusers = []
     allgroups = []
+    have_messages = False
     for group in all_receiver_groups:
         allgroups.append({"name": group.name, "id": group.id})
     for user in users:
-        allusers.append({"name": user.user.get_full_name(), "id": user.user.id})
+        if em_utils_.get_unread_messages(user, request.user.userprofile) > 0:
+            have_messages = True
+        allusers.append(
+            {"name": user.user.get_full_name(), "id": user.user.id,
+             "unread_messages": em_utils_.get_unread_messages(user, request.user.userprofile)})
 
-    print("users====", users)
+    print("users====", allusers)
     context = {
         "form": form,
         "all_users": allusers,
         "all_groups": allgroups,
+        "have_messages": have_messages,
         "request": request,
         "admin": True,
         'nav_class': "messages",

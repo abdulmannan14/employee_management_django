@@ -14,6 +14,7 @@ from account import models as account_models
 from django.db.models import Q
 from . import forms as management_forms, tables as management_tables
 from account import models as account_models
+from employee_management import utils as em_utils_
 
 
 def next_shifts(request):
@@ -116,18 +117,25 @@ def sa_messages(request):
     form.fields['user'].queryset = account_models.UserProfile.objects.all().exclude(user_id=request.user.id)
     users = account_models.UserProfile.objects.all().exclude(user_id=request.user.id)
     all_receiver_groups = management_models.ReceiverGroup.objects.filter(users=request.user.userprofile, is_group=True)
+    have_messages = False
     allgroups = []
     for group in all_receiver_groups:
-        allgroups.append({"name": group.name, "id": group.id})
+        allgroups.append({"name": group.name, "id": group.id,
+                          "unread_messages": em_utils_.get_group_unread_messages(request, group.id)})
     allusers = []
     for user in users:
-        allusers.append({"name": user.user.get_full_name(), "id": user.user.id})
+        if em_utils_.get_unread_messages(user, request.user.userprofile) > 0:
+            have_messages = True
+        allusers.append(
+            {"name": user.user.get_full_name(), "id": user.user.id,
+             "unread_messages": em_utils_.get_unread_messages(user, request.user.userprofile)})
 
-    print("users====", users)
+    print("users====", allgroups)
     context = {
         "form": form,
         "all_users": allusers,
         "all_groups": allgroups,
+        "have_messages": have_messages,
         "request": request,
         "sales_advisor": True,
         'nav_class': "messages",
@@ -141,3 +149,17 @@ def sa_messages(request):
         ],
     }
     return render(request, 'admin/messages.html', context)
+
+
+def mark_message_as_read(request):
+    sender = request.GET.get('sender', None)
+    sender = account_models.UserProfile.objects.get(user_id=sender)
+    receiver = request.user.userprofile
+    em_utils_.mark_messages_as_read(sender, receiver)
+    return JsonResponse({"status": "success"})
+
+
+def mark_group_message_as_read(request):
+    group = request.GET.get('group', None)
+    em_utils_.mark_group__messages_as_read(request, group)
+    return JsonResponse({"status": "success"})

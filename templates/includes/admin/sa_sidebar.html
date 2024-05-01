@@ -36,6 +36,9 @@
     <li>
         <a href="{% url 'sa-messages' %}" class="nav-link {% if nav_class == 'messages' %}activo{% endif %}">
             <i class="fas fa-comment"></i> Messages
+            {% if request.user.userprofile.get_unread_messages > 0 %}
+            <span class="badge badge-pill  " style="border-radius: 40% ; ">{{ request.user.userprofile.get_unread_messages }}</span> 
+            {% endif %}
         </a>
     </li>
 

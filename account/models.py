@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from management import models as management_models
 
 # Create your models here.
 
@@ -24,3 +25,16 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.get_full_name()
+
+    @property
+    def get_unread_messages(self):
+        unread_messages = 0
+        receiver_objs = management_models.ReceiverGroup.objects.filter(users=self)
+        for receiver_obj in receiver_objs:
+            messages = management_models.Message.objects.filter(receiver=receiver_obj).order_by(
+                'created_at')
+            for message in messages:
+                if message.sender.user_id != self.user.id:
+                    if not message.is_read:
+                        unread_messages += 1
+        return unread_messages

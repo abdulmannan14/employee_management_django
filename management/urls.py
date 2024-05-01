@@ -26,4 +26,6 @@ urlpatterns = [
     path('request/add', sa_views.add_request, name='sa-add-request'),
     path('task/complete/<int:id>', sa_views.mark_task_as_complete, name='sa_mark_task_as_complete'),
     path('sa_message', sa_views.sa_messages, name='sa-messages'),
+    path('mark_message_as_read', sa_views.mark_message_as_read, name='mark-messages-as-read'),
+    path('mark_group_message_as_read', sa_views.mark_group_message_as_read, name='mark-group-messages-as-read'),
 ]
